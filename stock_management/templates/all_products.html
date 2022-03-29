@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png" />
+    <link rel="icon" href="{{ url_for('static', filename='logo.png') }}" type="image/png">
+
+    {% if title %}
+        <title>SMS - {{ title }}</title>
+    {% else %}
+        <title>SMS - Stock Management System</title>
+    {% endif %}
+</head>
+<body>
+    <header class="site-header">
+      <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+        <div class="container">
+          <a class="navbar-brand mr-4" href="/">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" height="42" width="42" style="margin-right: 20px;">SMS
+          </a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarToggle">
+            <!-- Navbar Right Side -->
+            <div class="navbar-nav ml-auto">
+              {% if current_user.is_authenticated %}
+                <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
+                {% if current_user.role=='Admin' %}
+                  <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                      Products
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                      <a class="dropdown-item" href="{{ url_for('new_product') }}">Add Product</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="{{ url_for('all_products') }}">Your Products</a>
+                    </div>
+                  </li>
+                {% else %}
+                  <a class="nav-item nav-link" href="{{ url_for('all_products') }}">Products</a>
+                  <a class="nav-item nav-link" href="{{ url_for('cart') }}">Cart</a>
+                {% endif %}             
+                <a class="nav-item nav-link" href="{{ url_for('all_bills') }}">Bills</a>
+                <li class="nav-item dropdown">
+                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown">
+                    Hi, {{ current_user.username }}
+                  </a>
+                  <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                    <a class="dropdown-item" href="{{ url_for('account') }}">Account</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{{ url_for('logout') }}">Logout</a>
+                  </div>
+                </li>
+              {% else %}
+                <a class="nav-item nav-link" href="{{ url_for('home') }}">Home</a>
+                <a class="nav-item nav-link" href="{{ url_for('login') }}">Login</a>
+                <a class="nav-item nav-link" href="{{ url_for('register') }}">Register</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+    <main role="main" class="container">
+      <div class="row">
+        <div class="col-md-12">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+          {% block content %}{% endblock %}
+        </div>
+      </div>
+      <form action="/allproducts" method="GET" class="form-inline">
+        <div class="form-group">
+            <input type="text" name="search" placeholder="Search" class="form-control">
+            <button type="submit" class="btn btn-search btn-outline-success ml-2">Search</button>
+        </div>
+    </form>
+    <br>
+    <div class="row text-center">
+    {% for product in products.items %}
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card h-100">
+          <h4 class="text-right" style="margin-top: -10px; margin-right: -10px;">
+            <span class="badge badge-danger">{{ '%0.2f'| format(product.discount|float) }} % off</span>
+          </h4>
+          <br>
+          <div class="text-center">
+              <img class="card-img-top rounded-circle article-img" src="{{ product.image_url }}">
+          </div>
+          <div class="card-body">
+            <a class="card-title mr-2" href="{{ url_for('product', product_id=product.id) }}"><h4>{{ product.name }}</h4></a>
+            <p class="card-text">{{ product.info }}</p>
+            <p class="card-text">Price: ₹ {{ '%0.2f'| format(product.price|float) }}</p>
+            {% if current_user.role=='Customer' %}
+              <p class="card-text">Units Left: {{ product.quantity }}</p>
+            {% endif %}
+            
+            {% if current_user.role=='Admin' and product.quantity>0 %}
+              <p class="card-text">Units Left: {{ product.quantity }}</p>
+            {% endif %}
+          </div>
+          {% if current_user.role=='Customer' %}
+            {% if product.quantity==0 %}
+              <div class="card-footer">
+                <h4 class="text-center">
+                  <span class="badge badge-warning pl-3 pr-3">Out of Stock</span>
+                </h4>
+              </div>
+            {% else %}
+              <div class="card-footer">
+                <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-primary">Add</a>
+              </div>
+            {% endif %}
+          
+          {% else %}
+            {% if product.quantity==0 %}
+              <div class="card-footer">
+                <h4 class="text-center">
+                  <span class="badge badge-warning pl-3 pr-3">Out of Stock</span>
+                </h4>
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+    {% if disabled %}
+      {% for product in products %}
+      <div class="col-lg-3 col-md-6 mb-4">
+          <div class="card h-100">
+            <br>
+            <div class="text-center">
+                <img class="card-img-top rounded-circle article-img" src="{{ product.image_url }}">
+            </div>
+            <div class="card-body">
+              <a class="card-title mr-2" href="{{ url_for('product', product_id=product.id) }}"><h4>{{ product.name }}</h4></a>
+              <p class="card-text">{{ product.info }}</p>
+              <p class="card-text">Price: ₹ {{ '%0.2f'| format(product.price|float) }}</p>
+              {% if current_user.role=='Customer' %}
+                <p class="card-text">Units Left: {{ product.quantity }}</p>
+              {% endif %}
+              
+              {% if current_user.role=='Admin' and product.quantity>0 %}
+                <p class="card-text">Units Left: {{ product.quantity }}</p>
+              {% endif %}
+            </div>
+            {% if current_user.role=='Customer' %}
+              {% if product.quantity==0 %}
+              <div class="card-footer">
+                <h4 class="text-center">
+                  <span class="badge badge-warning pl-3 pr-3">Out of Stock</span>
+                </h4>
+              </div>
+              {% else %}
+                <div class="card-footer">
+                  <a href="{{ url_for('add_to_cart', product_id=product.id) }}" class="btn btn-primary">Add</a>
+                </div>
+              {% endif %}
+            
+            {% else %}
+              {% if product.quantity==0 %}
+                <div class="card-footer">
+                  <h4 class="text-center">
+                    <span class="badge badge-warning pl-3 pr-3">Out of Stock</span>
+                  </h4>
+                </div>
+              {% endif %}
+            {% endif %}
+          </div>
+      </div>
+      {% endfor %}
+    {% endif %}
+    </div>
+    <div>
+    {% if not disabled %}
+      {% for page_num in products.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+          {% if products.page == page_num %}
+            <a class="btn btn-info mb-4" href="{{ url_for('all_products', page=page_num) }}">{{ page_num }}</a>
+          {% else %}
+            <a class="btn btn-outline-info mb-4" href="{{ url_for('all_products', page=page_num) }}">{{ page_num }}</a>
+          {% endif %}
+        {% else %}
+          ...
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  </div>
+</main>
+<footer class="py-5 bg-dark">
+  <div class="container">
+    <p class="m-0 text-center text-white">Copyright &copy; SMS 2022</p>
+  </div>
+  <!-- /.container -->
+</footer>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
+

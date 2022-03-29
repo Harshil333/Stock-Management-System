@@ -1,0 +1,62 @@
+{% extends "layout2.html" %}
+{% block content %}
+
+  <form method="POST" action="{{url_for('confirmed')}}">
+      {{ form.hidden_tag() }}
+      <fieldset class="form-group">
+              <div>
+                  <label class="form-control-label-lg">Discount Percentage on Total Amount</label>
+                  <input class="form-control form-control-lg" type="text" name="discount" value={{final_discount}} readonly>
+              </div>
+              <div>
+                  <p class="lead">Final Bill Amount: ₹ {{'%0.2f'| format(final_total|float)}}</p>
+              </div>
+          <legend class="border-bottom mb-4">{{ legend }}</legend>
+          <div class="form-group">
+              {{ form.name.label(class="form-control-label") }}
+              {% if form.name.errors %}
+                  {{ form.name(class="form-control form-control-lg is-invalid") }}
+                  <div class="invalid-feedback">
+                      {% for error in form.name.errors %}
+                          <span>{{ error }}</span>
+                      {% endfor %}
+                  </div>
+              {% else %}
+                  {{ form.name(class="form-control form-control-lg") }}
+              {% endif %}
+          </div>
+          <div class="form-group">
+              {{ form.email.label(class="form-control-label") }}
+              {% if form.email.errors %}
+                  {{ form.email(class="form-control form-control-lg is-invalid") }}
+                  <div class="invalid-feedback">
+                      {% for error in form.email.errors %}
+                          <span>{{ error }}</span>
+                      {% endfor %}
+                  </div>
+              {% else %}
+                  {{ form.email(class="form-control form-control-lg") }}
+              {% endif %}
+          </div>
+          <div class="form-group">
+              {{ form.phone.label(class="form-control-label") }}
+              {% if form.phone.errors %}
+                  {{ form.phone(class="form-control form-control-lg is-invalid") }}
+                  <div class="invalid-feedback">
+                      {% for error in form.phone.errors %}
+                          <span>{{ error }}</span>
+                      {% endfor %}
+                  </div>
+              {% else %}
+                  {{ form.phone(class="form-control form-control-lg") }}
+              {% endif %}
+          </div>
+      </fieldset>
+      <div class="form-group">
+          {{ form.submit(class="btn btn-lg btn-outline-success") }}
+      </div>
+  </form>
+</div>
+
+{% endblock content %}
+

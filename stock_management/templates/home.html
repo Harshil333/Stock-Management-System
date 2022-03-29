@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+{% block content %}
+  <header class="jumbotron my-4">
+    <h1 class="display-3">We Are SMS</h1>
+    <p class="lead">Stock Management System - SMS - is an opensource online Inventory Management system.</p>
+    <!-- <p class="lead">SMS is used to show how much stock you have at any one time, and how you keep track of it.</p> -->
+    <p class="lead">SMS also offers services of an online store such as adding products to a cart and a paperless billing system.</p>
+    <p class="lead">This project is made opensource with the view to reduce the shedding of tree due to paper used in maintaining stock levels and printing bills.</p>
+    <p class="lead">More data is coming soon ... Stay Tuned</p>
+    {% if not current_user.is_authenticated %}
+      <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg bg-dark">Register Now!</a>
+    {% endif %}
+  </header>
+{% endblock content %}
