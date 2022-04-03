@@ -21,11 +21,8 @@ login_manager.login_message_category = 'info'
 app.config['MAIL_SERVER'] = 'smtp.googlemail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_USERNAME'] = 'harshildoshi6333@gmail.com'
-app.config['MAIL_PASSWORD'] = 'harshil007'
+app.config['MAIL_USERNAME'] = 'yourmailaddress@gmail.com'
+app.config['MAIL_PASSWORD'] = 'yourpassword'
 mail = Mail(app)
-
-from commands import cmd
-app.register_blueprint(cmd)
 
 from stock_management import routes

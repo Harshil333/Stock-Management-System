@@ -136,7 +136,7 @@ def account():
 def send_reset_email(user):
     token = user.get_reset_token()
     msg = Message('Password Reset Request',
-                  sender='noreply@demo.com',
+                  sender='youremailaddress@gmail.com',
                   recipients=[user.email])
     msg.body = f'''To reset your password, visit the following link:
 {url_for('reset_token', token=token, _external=True)}
@@ -373,7 +373,7 @@ def proceed():
 def send_stock_units_email(products_below_zero):
     try:
         msg = Message('Product Out of Stock',
-                    sender='harshildoshi6333@gmail.com',
+                    sender='youremailaddress@gmail.com',
                     recipients=[i.author.email for i in products_below_zero])
         msg.body = f'''Dear admin,
     One of your products is out of stock. Please update the quantities for those products.
